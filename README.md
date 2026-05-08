@@ -1,85 +1,106 @@
-# UrbanMind AI
+# GreenGrid AI
 
-> AI-powered smart city expansion planner for the AI Autonomous Smart City Hackathon 2026.
+> **AI climate resilience planner for growing cities.**
 
-[Demo Video Link] | [Live Demo] | [Documentation]
+GreenGrid AI helps cities test sustainable infrastructure plans that improve green space, transit access, walkability, heat resilience, and emissions. It analyzes urban heat islands, green-space gaps, and transit deserts, then generates an AI-recommended climate-resilient infrastructure plan and visualizes the before-and-after impact on environmental metrics.
 
-## What It Does
+**Hackathon target:** Tech to Treasure Environmental Hackathon
 
-UrbanMind AI helps planners explore how real cities can expand over the next 50 years. It combines live city maps, zoning constraints, infrastructure placement, growth metrics, and AI-generated planning explanations into one interactive simulation.
+---
 
-The app lets a user select one of nine global cities, choose a planning scenario, and watch an autonomous agent place housing, roads, services, utilities, parks, and resilience infrastructure year by year. The map, metrics, charts, timeline, and AI decision history update as the simulation runs.
+## Demo Flow
 
-The impact is a faster way to compare urban futures. Planners can test growth-first, equity-first, climate-resilient, historic, and balanced strategies, then export a professional report that explains tradeoffs in population, mobility, emissions, green space, infrastructure load, and public-service coverage.
+1. **Landing screen** — Brief overview of GreenGrid AI and the demo city, **Fremon, CA** (213,000 residents, +35% growth projected).
+2. **Analyze** — The AI Copilot scans Fremon's satellite heat signatures, green coverage, and transit access. Heat-risk zones (red/orange/yellow polygons) appear over the map:
+   - **Central Heat Island** (downtown core)
+   - **West Congestion Emissions Zone**
+   - **North Transit Access Gap**
+   - **New Housing Green Space Gap**
+3. **AI Plan** — The Copilot generates a 6-element climate-resilient infrastructure plan:
+   - 🌳 **Central Green Corridor** (headline recommendation)
+   - 🚊 North Transit Hub
+   - 🚌 West Congestion Relief Transit Stop
+   - 🏘️ New Housing Expansion Community Center
+   - 🏥 South Emergency Gap Clinic
+   - 🏫 East Education District School
+4. **Apply AI Plan** — One click and the map transforms: heat zones fade, a green corridor appears downtown, and color-coded coverage rings (green for parks, purple for transit, red for emergency, blue for education) expand across the city.
+5. **Environmental metrics update** — All 8 environmental metrics animate to their new values (e.g., Climate Resilience 52 → 81, CO₂ Estimate 100 → 84, Green Space 52 → 74).
+6. **Environmental Impact Report** — Full multi-section report with executive summary, climate risks, AI plan, before/after table, cost, residents benefited, assumptions, and next steps.
 
-## Quick Start
+### Pitch summary
+
+> GreenGrid AI analyzed Fremon under 35% projected growth, detected heat, green space, and transit gaps, then generated a climate-resilient infrastructure plan that improves Climate Resilience from **52 to 81** and serves **74,000 residents**.
+
+---
+
+## Setup Instructions
 
 ```bash
-git clone https://github.com/yourusername/urbanmind-ai
-cd urbanmind-ai
-cp .env.example .env
-# Add ANTHROPIC_API_KEY and MAPBOX_TOKEN to .env
-docker-compose up
-# Open http://localhost
+git clone <this-repo>
+cd greengrid-ai
+npm install
+npm run dev
 ```
+
+Then open the URL Vite prints (typically `http://localhost:5173`).
+
+The app runs entirely in the browser — no backend, API keys, or external services required for the demo. The map uses [OpenFreeMap](https://openfreemap.org/) tiles, which are free and tokenless.
+
+---
 
 ## Tech Stack
 
-React, TypeScript, Vite, Mapbox GL, D3, Zustand, Framer Motion, Python, FastAPI, PostgreSQL/PostGIS, Redis, RQ, MinIO, Docker Compose, OSMnx, GeoPandas, PyTorch, Stable Baselines3, Anthropic Claude.
+- **React 18** + **TypeScript**
+- **Vite 5** — dev server and build
+- **MapLibre GL** — interactive map (no Mapbox token required; uses OpenFreeMap tiles)
+- **Framer Motion** — animations for panels, metric counters, and map transitions
+- **Tailwind CSS** — utility styling alongside inline styles
+- **Lucide React** — icons
+- **Zustand** — state (carried over from the base; the demo page is self-contained)
 
-## AI Architecture
+---
 
-UrbanMind AI is structured around a reinforcement-learning simulation loop. The agent observes a geospatial grid, existing roads, terrain suitability, city metrics, and scenario weights, then chooses the next zone or infrastructure placement. Phase 2 provides the AI-engine foundation for PPO-style optimization, constraint validation, road generation, demand forecasting, and population modeling.
+## Environmental Metrics Tracked
 
-The backend streams each simulation frame through Redis and WebSockets. The frontend renders those frames as Mapbox layers and D3 analytics. Claude powers the narrative layer: hover explanations, annual summaries, decision history, report summaries, and recommendations.
+| Metric                   | Before | After |
+| :----------------------- | -----: | ----: |
+| Climate Resilience Score |     52 |    81 |
+| Green Space Access       |    52% |   74% |
+| CO₂ Estimate             |    100 |    84 |
+| Transit Coverage         |    48% |   72% |
+| Heat Risk                |     74 |    49 |
+| Walkability              |     56 |    76 |
+| Tree Canopy Access       |    38% |   61% |
+| 15-Minute City Score     |     54 |    79 |
 
-## Features
+---
 
-- Real-city planning for New York, Los Angeles, Tokyo, Lagos, London, Sao Paulo, Singapore, Dubai, and Mumbai
-- Year-by-year WebSocket simulation playback
-- Mapbox zones, roads, heatmaps, and 3D building extrusions
-- Scenario selector for balanced, max growth, climate resilient, equity focused, and historic plans
-- Six live D3 dashboard charts
-- AI decision tooltips and explanation drawer
-- Split-screen scenario comparison
-- Procedural sandbox city generator
-- ReportLab PDF export
-- Keyboard navigation, ARIA labels, and color-blind-friendly secondary cues
+## Project Structure
 
-## Screenshots
+```
+greengrid-ai/
+├── frontend/                              # Vite + React app
+│   ├── src/
+│   │   ├── App.tsx                        # Entrypoint (landing → demo)
+│   │   ├── components/
+│   │   │   ├── UI/LandingScreen.tsx       # GreenGrid-branded landing
+│   │   │   └── Demo/
+│   │   │       └── GreenGridDemoPage.tsx  # Full demo: map + copilot + metrics + report
+│   │   └── ...                            # Stores, utils, types from the base project
+│   ├── index.html
+│   └── package.json
+├── package.json                           # Root proxy (npm install / npm run dev)
+└── README.md
+```
 
-- Landing and city gallery
-- Tokyo simulation map
-- Analytics dashboard
-- AI explanation tooltip
-- Split-screen comparison
-- Sandbox terrain generator
-- PDF report export
+The core demo lives in **`frontend/src/components/Demo/GreenGridDemoPage.tsx`**. It owns the map, the AI Copilot panel, the environmental metrics panel, and the report modal — all in one self-contained component.
 
-## Hackathon Category
+---
 
-Smart Traffic and Mobility, Smart Energy Management, Urban Healthcare, and Public Safety Infrastructure.
+## Submission Summary
 
-## Team
+GreenGrid AI is a sustainable city planning simulator built for the **Tech to Treasure Environmental Hackathon**. It demonstrates how AI can help growing cities reduce heat, improve green space, increase transit access, and lower emissions.
 
-See `members.csv` for team roster details.
+Using a fictional Central Valley city (Fremon, CA) under +35% growth pressure, it identifies four climate-risk zones and generates a six-element infrastructure plan, then visualizes the measurable environmental impact: Climate Resilience improves from 52 to 81 and 74,000 residents gain improved green and service access.
 
-## License
-
-MIT
-
-## Demo Video Script
-
-0:00-0:30: Show Tokyo at Year 2074 and introduce the 50-year planning question.
-
-0:30-1:20: Open the gallery, select Lagos, and choose the Equity Focused scenario.
-
-1:20-2:30: Run playback at 10x. Pause at Year 20 and hover a hospital placement to show the AI explanation.
-
-2:30-3:15: Demonstrate a manual override and show how metrics respond.
-
-3:15-4:00: Open the dashboard and explain the population timeline, radar chart, and infrastructure scatter.
-
-4:00-4:30: Compare Equity Focused against Max Growth in split-screen mode.
-
-4:30-5:00: Generate a coastal sandbox city, start the simulation, and export the PDF report.
+The core innovation is the **before/after map transformation**: red heat zones visibly fade as the AI plan's green corridor and color-coded coverage rings appear, making the climate impact of urban planning decisions immediately legible to non-technical stakeholders.
