@@ -1,0 +1,236 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Override shadcn Nova defaults with our dark navy theme ── */
+@layer base {
+  :root,
+  .dark {
+    /* Navy dark backgrounds in oklch */
+    --background: oklch(0.09 0.025 240);
+    --foreground: oklch(0.95 0.01 220);
+    --card: oklch(0.13 0.03 240);
+    --card-foreground: oklch(0.95 0.01 220);
+    --popover: oklch(0.11 0.03 240);
+    --popover-foreground: oklch(0.95 0.01 220);
+    /* Electric blue primary */
+    --primary: oklch(0.72 0.15 210);
+    --primary-foreground: oklch(0.09 0.025 240);
+    --secondary: oklch(0.15 0.03 240);
+    --secondary-foreground: oklch(0.85 0.01 220);
+    --muted: oklch(0.13 0.025 240);
+    --muted-foreground: oklch(0.55 0.04 230);
+    --accent: oklch(0.72 0.15 210);
+    --accent-foreground: oklch(0.09 0.025 240);
+    --destructive: oklch(0.65 0.2 20);
+    --border: oklch(0.22 0.04 240);
+    --input: oklch(0.18 0.03 240);
+    --ring: oklch(0.72 0.15 210);
+    --radius: 0.75rem;
+    /* Charts */
+    --chart-1: oklch(0.72 0.15 210);
+    --chart-2: oklch(0.72 0.15 175);
+    --chart-3: oklch(0.65 0.15 280);
+    --chart-4: oklch(0.8 0.17 85);
+    --chart-5: oklch(0.65 0.2 20);
+    /* Sidebar */
+    --sidebar: oklch(0.11 0.028 240);
+    --sidebar-foreground: oklch(0.95 0.01 220);
+    --sidebar-primary: oklch(0.72 0.15 210);
+    --sidebar-primary-foreground: oklch(0.09 0.025 240);
+    --sidebar-accent: oklch(0.15 0.03 240);
+    --sidebar-accent-foreground: oklch(0.85 0.01 220);
+    --sidebar-border: oklch(0.22 0.04 240);
+    --sidebar-ring: oklch(0.72 0.15 210);
+    /* Font */
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-heading: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-primary, 'Inter', system-ui, sans-serif);
+  }
+}
+
+/* ── Base resets ──────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: var(--color-bg-app, #07090F);
+  color: var(--color-text-primary, #EFF6FF);
+  font-family: var(--font-primary, 'Inter', system-ui, sans-serif);
+  overflow: hidden;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent-electric, #38BDF8);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* ── Scrollbars ──────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(56,189,248,0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56,189,248,0.45);
+}
+
+/* ── Map attribution ─────────────────────────────────── */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib,
+.maplibregl-ctrl-logo,
+.maplibregl-ctrl-attrib {
+  display: none !important;
+}
+
+/* ── Glass tiers ─────────────────────────────────────── */
+@layer components {
+  .glass-thin {
+    background: var(--glass-thin-bg);
+    backdrop-filter: blur(var(--glass-thin-blur));
+    -webkit-backdrop-filter: blur(var(--glass-thin-blur));
+    border: 1px solid var(--color-border-glass-thin);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+  }
+
+  .glass-regular {
+    background: var(--glass-regular-bg);
+    backdrop-filter: blur(var(--glass-regular-blur));
+    -webkit-backdrop-filter: blur(var(--glass-regular-blur));
+    border: 1px solid var(--color-border-glass);
+    box-shadow: var(--elev-2), 0 1px 0 rgba(255,255,255,0.05) inset;
+  }
+
+  .glass-thick {
+    background: var(--glass-thick-bg);
+    backdrop-filter: blur(var(--glass-thick-blur));
+    -webkit-backdrop-filter: blur(var(--glass-thick-blur));
+    border: 1px solid var(--color-border-glass-thick);
+    box-shadow: var(--elev-3), 0 1px 0 rgba(255,255,255,0.06) inset;
+  }
+
+  /* Backward-compat alias → removed in Phase 5 */
+  .glass-panel {
+    background: var(--glass-regular-bg);
+    backdrop-filter: blur(var(--glass-regular-blur));
+    -webkit-backdrop-filter: blur(var(--glass-regular-blur));
+    border: 1px solid var(--color-border-glass);
+    box-shadow: var(--elev-2);
+  }
+
+  .surface-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--elev-2);
+  }
+
+  .glow-ring {
+    box-shadow: 0 0 0 2px var(--color-bg-app), 0 0 0 4px var(--color-accent-electric), var(--glow-soft);
+  }
+
+  .glow-edge {
+    box-shadow: 0 0 0 1px rgba(56,189,248,0.3), var(--glow-soft);
+  }
+
+  .divider-soft {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border-medium) 30%, var(--color-border-medium) 70%, transparent);
+  }
+
+  .icon-btn {
+    display: inline-grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+    background: rgba(17,26,46,0.6);
+    color: var(--color-text-secondary);
+    transition: border-color var(--dur-2) var(--ease-out-expo),
+                color var(--dur-2) var(--ease-out-expo),
+                box-shadow var(--dur-2) var(--ease-out-expo),
+                background var(--dur-2) var(--ease-out-expo);
+  }
+
+  .icon-btn:hover {
+    border-color: var(--color-border-active);
+    color: var(--color-text-primary);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--glow-soft);
+  }
+
+  .icon-btn--active {
+    border-color: var(--color-accent-electric);
+    color: var(--color-accent-electric);
+    background: rgba(56,189,248,0.08);
+    box-shadow: var(--glow-soft);
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      rgba(56,189,248,0) 0%,
+      rgba(56,189,248,0.15) 50%,
+      rgba(56,189,248,0) 100%
+    );
+    background-size: 400px 100%;
+    animation: shimmer 1.8s infinite linear;
+  }
+}
+
+/* ── Keyframes ───────────────────────────────────────── */
+@keyframes skylineDrift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-180px); }
+}
+
+@keyframes windowGlow {
+  0%, 100% { opacity: 0.38; }
+  50%       { opacity: 0.9; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}

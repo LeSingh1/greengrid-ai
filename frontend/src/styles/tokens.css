@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ── Brand ─────────────────────────────────────────── */
+  --color-brand-primary: #1B4F8A;
+  --color-brand-secondary: #2E86C1;
+  --color-brand-accent: #17A589;
+  --color-brand-warning: #D4AC0D;
+  --color-brand-danger: #C0392B;
+
+  /* ── Accents ────────────────────────────────────────── */
+  --color-accent-electric: #38BDF8;
+  --color-accent-teal: #2DD4BF;
+  --color-accent-violet: #818CF8;
+  --color-accent-amber: #FCD34D;
+  --color-accent-rose: #FB7185;
+
+  /* ── Background ramp (deeper navy) ─────────────────── */
+  --color-bg-app: #07090F;
+  --color-bg-sidebar: #0B1220;
+  --color-bg-panel: #111A2E;
+  --color-bg-card: #18233D;
+  --color-bg-elevated: #1A2540;
+  --color-bg-hover: #22304F;
+  --color-bg-overlay: rgba(7,9,15,0.72);
+
+  /* ── Borders ────────────────────────────────────────── */
+  --color-border-subtle: #1E2D4A;
+  --color-border-medium: #243659;
+  --color-border-active: #38BDF8;
+  --color-border-glass-thin: rgba(56,189,248,0.08);
+  --color-border-glass: rgba(56,189,248,0.14);
+  --color-border-glass-thick: rgba(56,189,248,0.22);
+
+  /* ── Text ───────────────────────────────────────────── */
+  --color-text-primary: #EFF6FF;
+  --color-text-secondary: #93A8C7;
+  --color-text-muted: #4E6080;
+  --color-text-accent: #38BDF8;
+
+  /* ── Elevation shadows ──────────────────────────────── */
+  --elev-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --elev-2: 0 1px 0 rgba(255,255,255,0.05) inset, 0 8px 24px -8px rgba(0,0,0,0.55);
+  --elev-3: 0 1px 0 rgba(255,255,255,0.06) inset, 0 24px 60px -20px rgba(0,0,0,0.7);
+  --elev-float: 0 1px 0 rgba(255,255,255,0.06) inset, 0 32px 80px -24px rgba(0,0,0,0.75), 0 0 0 1px rgba(56,189,248,0.06);
+
+  /* ── Glow tokens ────────────────────────────────────── */
+  --glow-electric: 0 0 24px rgba(56,189,248,0.35), 0 0 8px rgba(56,189,248,0.2);
+  --glow-teal: 0 0 24px rgba(45,212,191,0.35), 0 0 8px rgba(45,212,191,0.2);
+  --glow-violet: 0 0 24px rgba(129,140,248,0.35), 0 0 8px rgba(129,140,248,0.2);
+  --glow-danger: 0 0 24px rgba(251,113,133,0.35), 0 0 8px rgba(251,113,133,0.2);
+  --glow-soft: 0 0 1px rgba(56,189,248,0.6), 0 0 18px rgba(56,189,248,0.18);
+
+  /* ── Glass tiers (backdrop-filter values set in CSS classes) ── */
+  --glass-thin-bg: rgba(17,26,46,0.55);
+  --glass-thin-blur: 12px;
+  --glass-regular-bg: rgba(11,18,32,0.72);
+  --glass-regular-blur: 20px;
+  --glass-thick-bg: rgba(7,9,15,0.82);
+  --glass-thick-blur: 28px;
+
+  /* ── Motion timing ──────────────────────────────────── */
+  --ease-out-expo: cubic-bezier(0.16,1,0.3,1);
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+  --ease-in-out: cubic-bezier(0.4,0,0.2,1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 520ms;
+
+  /* ── Transitions (legacy compat) ────────────────────── */
+  --transition-fast: 150ms var(--ease-out-expo);
+  --transition-med: 200ms var(--ease-out-expo);
+  --transition-slow: 350ms var(--ease-out-expo);
+
+  /* ── Spacing ────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* ── Radius ─────────────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-pill: 9999px;
+
+  /* ── Charts ─────────────────────────────────────────── */
+  --chart-grid: rgba(56,189,248,0.1);
+  --chart-line-primary: #38BDF8;
+  --chart-line-baseline: #4E6080;
+
+  /* ── Zone palette ───────────────────────────────────── */
+  --zone-res-low: #F5CBA7;
+  --zone-res-med: #E59866;
+  --zone-res-high: #CA6F1E;
+  --zone-industrial: #5D6D7E;
+  --zone-commercial: #2E86C1;
+  --zone-mixed-use: #A9DFBF;
+  --zone-green: #27AE60;
+  --zone-forest: #1E8449;
+  --zone-transit: #8E44AD;
+  --zone-health: #E74C3C;
+  --zone-education: #F9E79F;
+  --zone-utility: #7D6608;
+  --zone-government: #5D4E75;
+  --zone-culture: #D4AC0D;
+  --zone-disaster: #E67E22;
+  --zone-smart: #00BCD4;
+  --zone-waterfront: #1A6B8A;
+  --zone-landmark: #C0392B;
+  --zone-office: #2980B9;
+  --zone-food: #27AE60;
+
+  /* ── Fonts ──────────────────────────────────────────── */
+  --font-primary: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* ── shadcn/ui HSL semantic vars ────────────────────── */
+  /* These map our palette into the HSL format shadcn requires */
+  --background: 222 60% 5%;
+  --foreground: 213 100% 95%;
+  --card: 220 52% 13%;
+  --card-foreground: 213 100% 95%;
+  --popover: 220 55% 11%;
+  --popover-foreground: 213 100% 95%;
+  --primary: 199 93% 60%;
+  --primary-foreground: 222 60% 5%;
+  --secondary: 220 40% 16%;
+  --secondary-foreground: 213 100% 95%;
+  --muted: 220 45% 13%;
+  --muted-foreground: 215 20% 56%;
+  --accent: 199 93% 60%;
+  --accent-foreground: 222 60% 5%;
+  --destructive: 352 100% 73%;
+  --destructive-foreground: 213 100% 95%;
+  --border: 220 45% 20%;
+  --input: 220 45% 20%;
+  --ring: 199 93% 60%;
+  --radius: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}
