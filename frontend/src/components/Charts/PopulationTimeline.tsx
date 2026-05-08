@@ -22,7 +22,7 @@ export function PopulationTimeline() {
   const innerH = height - margin.top - margin.bottom
   const projection = useMemo(() => project(data), [data])
   const allPop = projection.flatMap((d) => [d.pop_total * 0.85, d.pop_total * 1.15])
-  const x = d3.scaleLinear().domain([0, 50]).range([0, innerW])
+  const x = d3.scaleLinear().domain([2026, 2076]).range([0, innerW])
   const y = d3.scaleLinear().domain([Math.min(...allPop) * 0.95, Math.max(...allPop) * 1.05]).range([innerH, 0]).nice()
   const line = d3.line<any>().x((d) => x(d.year)).y((d) => y(d.pop_total)).curve(d3.curveMonotoneX)
   const area = d3.area<any>().x((d) => x(d.year)).y0((d) => y(d.pop_total * 0.85)).y1((d) => y(d.pop_total * 1.15)).curve(d3.curveMonotoneX)
@@ -47,16 +47,54 @@ export function PopulationTimeline() {
         onClick={() => hover && scrubToYear(hover.year)}
       >
         <g transform={`translate(${margin.left},${margin.top})`}>
-          {d3.range(0, 51, 5).map((year) => <line key={year} x1={x(year)} x2={x(year)} y1={0} y2={innerH} stroke="var(--chart-grid)" strokeDasharray="4 4" />)}
-          {y.ticks(5).map((tick) => <g key={tick}><line x1={0} x2={innerW} y1={y(tick)} y2={y(tick)} stroke="var(--chart-grid)" /><text x={-10} y={y(tick) + 4} textAnchor="end" fill="var(--color-text-muted)" fontSize="11">{d3.format('.2s')(tick)}</text></g>)}
-          <path d={area(projection) ?? ''} fill="rgba(96,165,250,0.15)" />
-          <path d={line(projection) ?? ''} fill="none" stroke={scenarioColors[activeScenario]} strokeWidth="2.5" />
-          <path d={line(baseline) ?? ''} fill="none" stroke="var(--chart-line-baseline)" strokeWidth="1.5" strokeDasharray="6 5" />
-          <line x1={0} x2={innerW} y1={y(Math.max(...projection.map((d) => d.pop_total)) * 1.08)} y2={y(Math.max(...projection.map((d) => d.pop_total)) * 1.08)} stroke="var(--color-brand-danger)" strokeDasharray="4 4" />
-          <line x1={x(currentYear)} x2={x(currentYear)} y1={0} y2={innerH} stroke="var(--color-brand-accent)" strokeDasharray="3 4" />
-          {eventActions.map((action, index) => <g key={`${action.year}-${index}`} transform={`translate(${x(action.year)},0)`}><line y1={0} y2={innerH} stroke="rgba(255,255,255,0.35)" strokeDasharray="1 5" /><text transform="rotate(-45)" x={6} y={-4} fill="var(--color-text-secondary)" fontSize="10">{action.zone_display_name}</text></g>)}
-          <g transform={`translate(0,${innerH})`}>{x.ticks(10).map((tick) => <text key={tick} x={x(tick)} y={24} fill="var(--color-text-muted)" fontSize="11" textAnchor="middle">{tick}</text>)}</g>
-          {hover && <g transform={`translate(${x(hover.year)},0)`}><line y1={0} y2={innerH} stroke="white" opacity="0.55" /><rect x={8} y={14} width={170} height={76} rx={8} fill="rgba(17,24,39,0.94)" stroke="rgba(96,165,250,0.35)" /><text x={18} y={36} fill="white" fontSize="12" fontWeight="700">Year {hover.year}</text><text x={18} y={56} fill="var(--color-text-secondary)" fontSize="12">{Math.round(hover.pop_total).toLocaleString()} people</text><text x={18} y={74} fill="var(--color-text-muted)" fontSize="11">RES low/med/high/mixed</text></g>}
+          {d3.range(2026, 2077, 10).map((year) => (
+            <line key={year} x1={x(year)} x2={x(year)} y1={0} y2={innerH}
+              stroke="var(--chart-grid)" strokeDasharray="2 6" strokeWidth={0.5} />
+          ))}
+          {y.ticks(4).map((tick) => (
+            <g key={tick}>
+              <line x1={0} x2={innerW} y1={y(tick)} y2={y(tick)} stroke="var(--chart-grid)" strokeWidth={0.5} />
+              <text x={-8} y={y(tick) + 4} textAnchor="end" fill="var(--color-text-muted)" fontSize="10" fontFamily="JetBrains Mono, monospace">
+                {d3.format('.2s')(tick)}
+              </text>
+            </g>
+          ))}
+          <path d={area(projection) ?? ''} fill="var(--color-bg-hover)" opacity={0.42} />
+          <path d={line(projection) ?? ''} fill="none" stroke="var(--color-accent-cyan)" strokeWidth="2"
+            style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.15))' }} />
+          <path d={line(baseline) ?? ''} fill="none" stroke="var(--chart-line-baseline)"
+            strokeWidth="1" strokeDasharray="5 6" opacity={0.5} />
+          <line x1={x(currentYear)} x2={x(currentYear)} y1={0} y2={innerH}
+            stroke="var(--color-accent-cyan)" strokeDasharray="2 4" opacity={0.7} />
+          {eventActions.map((action, index) => (
+            <g key={`${action.year}-${index}`} transform={`translate(${x(action.year)},0)`}>
+              <line y1={0} y2={innerH} stroke="rgba(108,92,231,0.45)" strokeDasharray="1 4" />
+              <circle cy={8} r={3} fill="var(--color-accent-warning)" />
+            </g>
+          ))}
+          <g transform={`translate(0,${innerH})`}>
+            {x.ticks(6).map((tick) => (
+              <text key={tick} x={x(tick)} y={22} fill="var(--color-text-muted)" fontSize="10"
+                textAnchor="middle" fontFamily="JetBrains Mono, monospace">{tick}</text>
+            ))}
+          </g>
+          {hover && (
+            <g transform={`translate(${x(hover.year)},0)`}>
+              <line y1={0} y2={innerH} stroke="var(--color-accent-cyan)" opacity={0.5} strokeWidth={1} />
+              <rect x={8} y={10} width={160} height={68} rx={6}
+                fill="#e0e5ec" stroke="#babecc" />
+              <text x={16} y={30} fill="var(--color-accent-cyan)" fontSize="11"
+                fontWeight="700" fontFamily="JetBrains Mono, monospace">
+                YEAR {hover.year}
+              </text>
+              <text x={16} y={50} fill="var(--color-text-primary)" fontSize="11">
+                {Math.round(hover.pop_total).toLocaleString()} residents
+              </text>
+              <text x={16} y={66} fill="var(--color-text-muted)" fontSize="10">
+                Growth projection
+              </text>
+            </g>
+          )}
         </g>
       </svg>
     </div>
@@ -67,7 +105,8 @@ function project(data: any[]) {
   const sorted = [...data].sort((a, b) => a.year - b.year)
   const last = sorted.at(-1) ?? { year: 0, pop_total: 1000000 }
   const projected = [...sorted]
-  for (let year = last.year + 1; year <= 50; year += 1) {
+  const startYear = last.year < 2026 ? 2026 : last.year + 1
+  for (let year = startYear; year <= 2076; year += 1) {
     const growth = 1 + Math.max(0.006, (last.pop_growth_rate ?? 1.1) / 100)
     projected.push({ ...last, year, pop_total: last.pop_total * growth ** (year - last.year) })
   }
@@ -75,8 +114,8 @@ function project(data: any[]) {
 }
 
 function baselineFromCity(city: any, projection: any[]) {
-  if (!city?.historical_snapshots?.length) return projection.map((d) => ({ ...d, pop_total: projection[0].pop_total * (1 + d.year * 0.011) }))
+  if (!city?.historical_snapshots?.length) return projection.map((d) => ({ ...d, pop_total: projection[0].pop_total * (1 + Math.max(0, d.year - 2026) * 0.011) }))
   const start = city.historical_snapshots[0].population
   const end = city.population_current
-  return projection.map((d) => ({ ...d, pop_total: start + ((end - start) * d.year) / 50 }))
+  return projection.map((d) => ({ ...d, pop_total: start + ((end - start) * Math.max(0, d.year - 2026)) / 50 }))
 }

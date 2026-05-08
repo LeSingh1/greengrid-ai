@@ -1,67 +1,75 @@
 import { motion } from 'framer-motion'
-import { Building2 } from 'lucide-react'
 
 export function LoadingScreen() {
   return (
     <motion.div
-      className="fixed inset-0 flex flex-col items-center justify-center bg-bg-primary z-50"
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.4 }}
+      className="fixed inset-0 flex flex-col items-center justify-center z-50"
+      style={{ background: 'var(--color-bg-app)' }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center"
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="relative text-center z-10"
       >
-        {/* Logo */}
-        <div className="mb-8 flex items-center justify-center gap-3">
-          <div className="relative">
-            <motion.div
-              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-blue to-accent-cyan flex items-center justify-center text-3xl"
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-            >
-              <Building2 size={34} />
-            </motion.div>
-            <motion.div
-              className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-accent-blue to-accent-cyan opacity-30 blur-md"
-              animate={{ opacity: [0.2, 0.5, 0.2] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          </div>
-          <div className="text-left">
-            <h1 className="text-3xl font-bold text-text-primary tracking-tight">UrbanMind AI</h1>
-            <p className="text-sm text-accent-cyan font-mono tracking-widest uppercase">Smart City Expansion Planner</p>
-          </div>
-        </div>
+        {/* City icon */}
+        <motion.div
+          className="flex justify-center mb-6"
+          animate={{ filter: ['drop-shadow(0 2px 4px rgba(0,0,0,0.12))', 'drop-shadow(0 4px 8px rgba(0,0,0,0.18))', 'drop-shadow(0 2px 4px rgba(0,0,0,0.12))'] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <svg width={64} height={52} viewBox="0 0 64 52" aria-hidden="true">
+            <path d="M4 48V26h8V12h10v36h6V20h9v28h5V6h12v42h4v4H2v-4h2z" fill="var(--color-accent-cyan)" />
+          </svg>
+        </motion.div>
+
+        {/* Title */}
+        <h1
+          className="font-display font-bold tracking-widest uppercase mb-1"
+          style={{
+            fontSize: 36,
+            color: 'var(--color-text-primary)',
+            filter: 'drop-shadow(0 1px 0 #ffffff)',
+            letterSpacing: '0.18em',
+          }}
+        >
+          GreenGrid AI
+        </h1>
+        <p
+          className="font-mono text-xs tracking-widest uppercase mb-8"
+          style={{ color: 'var(--color-text-muted)', letterSpacing: '0.3em' }}
+        >
+          AI · City Simulation Engine
+        </p>
 
         {/* Progress bar */}
-        <div className="w-64 h-1 bg-bg-card rounded-full overflow-hidden">
+        <div
+          className="w-64 rounded-full overflow-hidden mx-auto mb-4"
+          style={{ height: 6, boxShadow: 'var(--shadow-inset)', background: 'var(--color-bg-hover)' }}
+        >
           <motion.div
-            className="h-full bg-gradient-to-r from-accent-blue to-accent-cyan"
+            className="h-full rounded-full"
+            style={{
+              background: 'var(--color-accent-cyan)',
+            }}
             initial={{ width: '0%' }}
             animate={{ width: '100%' }}
-            transition={{ duration: 1.1, ease: 'easeInOut' }}
+            transition={{ duration: 1.4, ease: 'easeInOut' }}
           />
         </div>
 
+        {/* Status text */}
         <motion.p
-          className="mt-4 text-text-muted text-sm font-mono"
+          className="font-mono text-xs tracking-widest"
+          style={{ color: 'var(--color-text-muted)', letterSpacing: '0.15em' }}
           animate={{ opacity: [0.4, 1, 0.4] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+          transition={{ duration: 1.6, repeat: Infinity }}
         >
-          Initializing simulation engine...
+          INITIALIZING SIMULATION ENGINE…
         </motion.p>
       </motion.div>
-
-      {/* Background grid */}
-      <div className="fixed inset-0 -z-10 opacity-5"
-        style={{
-          backgroundImage: 'linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-        }}
-      />
     </motion.div>
   )
 }

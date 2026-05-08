@@ -1,17 +1,144 @@
-import { FileText, Search, Sparkles } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FileText, Search, Sparkles, TriangleAlert } from 'lucide-react'
 import { useCityStore } from '@/stores/cityStore'
 import { useScenarioStore } from '@/stores/scenarioStore'
 import { useSimulationStore } from '@/stores/simulationStore'
+import { useTypewriter } from '@/hooks/useTypewriter'
+import { buildReportData } from '@/state/buildReportData'
+
+type CopilotStage = 'standby' | 'diagnosed' | 'applied'
+
+// Phase 2 — Copilot Thinking Sequence. Honest copy paced for legibility,
+// runs in parallel with the deterministic engine.
+const THINKING_STEPS = [
+  'Analyzing city growth...',
+  'Mapping underserved zones...',
+  'Ranking infrastructure gaps...',
+  'Preparing recommendation...',
+] as const
+
+import type { ScenarioId } from '@/types/city.types'
+
+const SCENARIO_LENS: Record<ScenarioId, { label: string; focus: string; priority: string; appliedNote: string }> = {
+  balanced: {
+    label: 'Balanced Growth',
+    focus: 'service-coverage gaps and growth pressure',
+    priority: 'I am weighing access, commute, and green space evenly.',
+    appliedNote: 'Open the report or scrub the timeline to watch each year unfold.',
+  },
+  transit_first: {
+    label: 'Transit First',
+    focus: 'mobility gaps and commute chokepoints',
+    priority: 'I am weighting transit hubs, rail access, and commute reduction first.',
+    appliedNote: 'Commute and CO2 should improve fastest under this lens.',
+  },
+  climate_resilient: {
+    label: 'Climate Resilient',
+    focus: 'green-space gaps, CO2 hot spots, and heat-risk corridors',
+    priority: 'I am prioritizing parks, tree corridors, and CO2 reduction.',
+    appliedNote: 'Watch CO2 and green-space coverage rise across the timeline.',
+  },
+  equity_focused: {
+    label: 'Equity Focused',
+    focus: 'underserved zones, school access, and emergency response gaps',
+    priority: 'I am surfacing the most underserved districts first.',
+    appliedNote: 'Equity score and underserved-zone coverage should rise sharply.',
+  },
+  emergency_ready: {
+    label: 'Emergency Ready',
+    focus: 'emergency response time, fire and clinic coverage gaps',
+    priority: 'I am weighting clinics, fire, police, and response coverage.',
+    appliedNote: 'Emergency response time should drop quickly under this plan.',
+  },
+  max_growth: {
+    label: 'Max Growth',
+    focus: 'housing pressure and land-use throughput',
+    priority: 'I am prioritizing housing capacity and supporting services.',
+    appliedNote: 'Population capacity rises fastest, watch commute as it does.',
+  },
+}
 
 export function RightPanel() {
   const selectedCity = useCityStore((state) => state.selectedCity)
   const activeScenario = useScenarioStore((state) => state.activeScenario)
-  const { planning, analyzeDemo, applyAIPlan, openReport } = useSimulationStore()
+  const { planning, analyzeDemo, applyAIPlan, openReport, focusRecommendation } = useSimulationStore()
   const topRecommendation = planning.topRecommendation
   const topItem = planning.aiRecommendations.find((item) => topRecommendation.itemIds?.includes(item.id)) ?? planning.aiRecommendations[0]
   const before = planning.beforeScores
   const afterPreview = previewAfterMetrics(planning)
   const populationServed = topRecommendation.expectedImpact.populationServed ?? Math.round((selectedCity?.population_current ?? planning.timelinePopulation) * 0.018)
+
+  // One-shot Impact Summary shine sweep when the apply-plan flag flips true.
+  const [justApplied, setJustApplied] = useState(false)
+  const wasApplied = useRef(planning.hasAppliedAIPlan)
+  useEffect(() => {
+    if (planning.hasAppliedAIPlan && !wasApplied.current) {
+      setJustApplied(true)
+      const t = setTimeout(() => setJustApplied(false), 1100)
+      wasApplied.current = true
+      return () => clearTimeout(t)
+    }
+    wasApplied.current = planning.hasAppliedAIPlan
+  }, [planning.hasAppliedAIPlan])
+
+  const [thinkingStep, setThinkingStep] = useState<number | null>(null)
+  const thinkingTimers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const lastAnalyzedScenario = useRef<ScenarioId | null>(null)
+  const clearThinkingTimers = useCallback(() => {
+    thinkingTimers.current.forEach((t) => clearTimeout(t))
+    thinkingTimers.current = []
+  }, [])
+  useEffect(() => () => clearThinkingTimers(), [clearThinkingTimers])
+  const handleAnalyze = useCallback(() => {
+    if (!selectedCity) return
+    clearThinkingTimers()
+    const fullSequence = !planning.hasAnalyzed || lastAnalyzedScenario.current !== activeScenario
+    // Kick off the deterministic engine immediately — paced UX runs in parallel.
+    analyzeDemo(selectedCity.id, activeScenario)
+    lastAnalyzedScenario.current = activeScenario
+    if (fullSequence) {
+      setThinkingStep(0)
+      thinkingTimers.current.push(setTimeout(() => setThinkingStep(1), 250))
+      thinkingTimers.current.push(setTimeout(() => setThinkingStep(2), 500))
+      thinkingTimers.current.push(setTimeout(() => setThinkingStep(3), 750))
+      thinkingTimers.current.push(setTimeout(() => setThinkingStep(null), 1000))
+    } else {
+      setThinkingStep(THINKING_STEPS.length - 1)
+      thinkingTimers.current.push(setTimeout(() => setThinkingStep(null), 400))
+    }
+  }, [activeScenario, analyzeDemo, clearThinkingTimers, planning.hasAnalyzed, selectedCity])
+  const isThinking = thinkingStep !== null
+  const stage: CopilotStage = isThinking
+    ? 'standby'
+    : planning.hasAppliedAIPlan ? 'applied' : planning.hasAnalyzed ? 'diagnosed' : 'standby'
+  const cityName = selectedCity?.name ?? 'this city'
+  const scenarioLens = SCENARIO_LENS[activeScenario]
+  const reportData = useMemo(() => buildReportData(planning, activeScenario), [planning, activeScenario])
+  const stressWarning = reportData.warningMessage
+  const stressLevel = reportData.stressLevel
+  const narration = useMemo(() => {
+    if (isThinking) {
+      return THINKING_STEPS[thinkingStep ?? 0] ?? THINKING_STEPS[THINKING_STEPS.length - 1]
+    }
+    if (stage === 'standby') {
+      return `Standing by under the ${scenarioLens.label} lens — I will scan ${cityName} for ${scenarioLens.focus} when you press analyze.`
+    }
+    if (stage === 'applied') {
+      const residents = reportData.residentsServed.toLocaleString()
+      const cityHealthAfter = Math.round(reportData.afterMetrics?.cityHealth ?? 0)
+      const horizonNote = reportData.status === 'needs_phase_2'
+        ? ` But by ${reportData.selectedYear} the plan no longer covers projected demand — Phase 2 is needed.`
+        : reportData.status === 'holds_through_2050s'
+          ? ` Plan holds through the ${reportData.selectedYear}s; recommend re-analysis before late-horizon.`
+          : ''
+      return `${scenarioLens.label} plan applied. ${residents} residents now reached, City Health at ${cityHealthAfter}.${horizonNote} ${scenarioLens.appliedNote}`
+    }
+    const reason = topRecommendation.reason || `${topRecommendation.zoneName} shows the largest unmet demand.`
+    const target = topItem?.name ?? topRecommendation.title.replace(/^Add\s+/i, '')
+    return `Analysis complete for ${cityName} under the ${scenarioLens.label} lens. ${scenarioLens.priority} ${reason} I recommend adding ${target}.`
+  }, [isThinking, thinkingStep, stage, cityName, scenarioLens, topRecommendation, topItem, reportData])
+  const { output: copilotText, done: copilotDone } = useTypewriter(narration, { speedMs: 16, startDelayMs: 60 })
 
   return (
     <aside
@@ -23,18 +150,48 @@ export function RightPanel() {
       }}
     >
       <div className="space-y-3 p-3">
+        <CopilotHeader stage={stage} />
+        <p className="text-sm leading-relaxed min-h-[3.5em]" style={{ color: 'var(--color-text-secondary)' }}>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={stage + narration.slice(0, 18)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+            >
+              {copilotText}
+              {!copilotDone && <span className="copilot-caret" aria-hidden="true">|</span>}
+            </motion.span>
+          </AnimatePresence>
+        </p>
+
+        {stressWarning && (stressLevel === 'high' || stressLevel === 'critical') ? (
+          <div
+            className="flex items-start gap-2 rounded-lg p-2.5"
+            style={{
+              background: stressLevel === 'critical' ? 'rgba(245,158,11,0.10)' : 'rgba(245,158,11,0.06)',
+              border: `1px solid ${stressLevel === 'critical' ? 'rgba(245,158,11,0.45)' : 'rgba(245,158,11,0.28)'}`,
+            }}
+          >
+            <TriangleAlert size={14} style={{ color: 'var(--color-accent-warning)', flexShrink: 0, marginTop: 1 }} />
+            <div className="min-w-0">
+              <div className="font-mono text-[9px] uppercase tracking-widest" style={{ color: 'var(--color-accent-warning)' }}>
+                {stressLevel === 'critical' ? 'Capacity Warning' : 'Growth Pressure'}
+              </div>
+              <p className="text-[11px] leading-relaxed mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                {stressWarning}
+              </p>
+            </div>
+          </div>
+        ) : null}
+
         {!planning.hasAnalyzed ? (
           <section className="rounded-lg p-4" style={{ background: 'var(--color-bg-hover)', border: '1px solid var(--color-border-subtle)' }}>
-            <h2 className="font-display text-lg font-semibold leading-tight" style={{ color: 'var(--color-text-primary)' }}>
-              Ready to analyze infrastructure gaps
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-              Run analysis to identify underserved zones and recommended fixes.
-            </p>
             <button
               type="button"
-              onClick={() => selectedCity && analyzeDemo(selectedCity.id, activeScenario)}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold"
+              onClick={handleAnalyze}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold"
               style={{ background: 'var(--color-bg-panel)', color: 'var(--color-accent-cyan)', border: '1px solid rgba(255,71,87,0.35)', boxShadow: 'var(--shadow-sm)' }}
             >
               <Search size={16} />
@@ -43,9 +200,17 @@ export function RightPanel() {
           </section>
         ) : (
           <section className="rounded-lg p-4" style={{ background: 'var(--color-bg-hover)', border: '1px solid rgba(255,71,87,0.3)', boxShadow: 'var(--shadow-sm)' }}>
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest" style={{ color: 'var(--color-accent-cyan)' }}>
-              <Sparkles size={14} />
-              Top Recommendation
+            <div className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-widest" style={{ color: 'var(--color-accent-cyan)' }}>
+              <span className="inline-flex items-center gap-2"><Sparkles size={14} />Top Recommendation</span>
+              {planning.useEngine && (
+                <span
+                  className="rounded-full px-2 py-0.5"
+                  style={{ color: 'var(--color-accent-green)', border: '1px solid rgba(0,184,148,0.4)', background: 'rgba(0,184,148,0.08)' }}
+                  title="Recommendation passed all 12 deterministic validation checks"
+                >
+                  Validated
+                </span>
+              )}
             </div>
             {!planning.hasAppliedAIPlan ? (
               <>
@@ -64,6 +229,39 @@ export function RightPanel() {
                   <Impact label="Confidence" value={`${Math.round((topItem?.confidence ?? topRecommendation.confidence ?? 0.82) * 100)}%`} />
                   <Impact label="Population Served" value={populationServed.toLocaleString()} />
                 </div>
+                {planning.aiRecommendations.length > 1 && (
+                  <div className="mt-3">
+                    <div className="font-mono text-[10px] uppercase tracking-widest mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                      All Recommendations
+                    </div>
+                    <div className="grid gap-1.5">
+                      {planning.aiRecommendations.slice(0, 6).map((rec) => {
+                        const focused = planning.focusedRecommendationId === rec.id
+                        return (
+                          <button
+                            key={rec.id}
+                            type="button"
+                            onMouseEnter={() => focusRecommendation(rec.id)}
+                            onMouseLeave={() => focusRecommendation(null)}
+                            onClick={() => focusRecommendation(rec.id)}
+                            className="rounded-md px-2 py-1.5 text-left text-xs transition-colors"
+                            style={{
+                              background: focused ? 'rgba(0,212,255,0.10)' : 'var(--color-bg-card)',
+                              border: `1px solid ${focused ? 'rgba(0,212,255,0.45)' : 'var(--color-border-subtle)'}`,
+                              boxShadow: focused ? '0 0 0 2px rgba(0,212,255,0.15)' : 'none',
+                              color: 'var(--color-text-secondary)',
+                            }}
+                          >
+                            <div className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{rec.name}</div>
+                            <div className="font-mono text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+                              {rec.category.replace(/_/g, ' ')} · ${(rec.costEstimate / 1_000_000).toFixed(0)}M · {Math.round(rec.confidence * 100)}%
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
                 <div className="mt-4 grid gap-2">
                   <button
                     type="button"
@@ -86,8 +284,11 @@ export function RightPanel() {
             ) : (
               <>
                 <h2 className="mt-2 font-display text-lg font-semibold" style={{ color: 'var(--color-accent-green)' }}>
-                  AI Plan Applied
+                  Plan Applied Successfully
                 </h2>
+                <p className="mt-2 text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                  {selectedCity?.name ?? 'This city'} is now closer to 15-minute city compliance.
+                </p>
                 <button
                   type="button"
                   onClick={openReport}
@@ -103,9 +304,21 @@ export function RightPanel() {
         )}
 
         {planning.hasAppliedAIPlan && (
-          <section className="rounded-lg p-4" style={{ background: 'rgba(0,184,148,0.08)', border: '1px solid rgba(0,184,148,0.32)' }}>
-            <div className="font-display text-base font-semibold" style={{ color: 'var(--color-accent-green)' }}>Impact Summary</div>
-            <ImpactSummary />
+          <section className={`rounded-lg p-4 ${justApplied ? 'impact-summary-sweep' : ''}`} style={{ background: 'rgba(0,184,148,0.08)', border: '1px solid rgba(0,184,148,0.32)' }}>
+            <div className="flex items-center justify-between">
+              <div className="font-display text-base font-semibold" style={{ color: 'var(--color-accent-green)' }}>Impact Summary</div>
+              <span
+                className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest"
+                style={{
+                  color: reportData.status === 'needs_phase_2' ? 'var(--color-accent-warning)' : 'var(--color-accent-green)',
+                  background: reportData.status === 'needs_phase_2' ? 'rgba(245,158,11,0.10)' : 'rgba(16,185,129,0.10)',
+                  border: `1px solid ${reportData.status === 'needs_phase_2' ? 'rgba(245,158,11,0.40)' : 'rgba(16,185,129,0.40)'}`,
+                }}
+              >
+                {reportData.statusLabel}
+              </span>
+            </div>
+            <ImpactSummary data={reportData} />
           </section>
         )}
 
@@ -165,27 +378,45 @@ export function RightPanel() {
   )
 }
 
-function ImpactSummary() {
-  const planning = useSimulationStore((s) => s.planning)
-  const summary = planning.impactSummary
-  const before = planning.beforeScores
-  const after = planning.afterScores ?? before
-  const residents = summary?.residentsServed ?? after?.populationServed ?? 0
-  const gaps = summary?.gapsFixed ?? planning.underservedZones.filter((zone) => zone.isImproved).length
-  const cityHealth = summary?.cityHealthDelta ?? delta(after?.cityHealth, before?.cityHealth)
-  const emergency = summary?.emergencyDelta ?? delta(after?.emergencyAccess, before?.emergencyAccess)
-  const equity = summary?.equityDelta ?? delta(after?.equityScore, before?.equityScore)
-  const fifteen = summary?.fifteenMinuteDelta ?? delta(after?.fifteenMinuteCityScore, before?.fifteenMinuteCityScore)
-  const cost = summary?.budgetUsed ?? after?.totalEstimatedCost ?? planning.infrastructure.filter((item) => item.status === 'proposed').reduce((sum, item) => sum + item.costEstimate, 0)
+function ImpactSummary({ data }: { data: ReturnType<typeof buildReportData> }) {
   return (
     <div className="mt-3 grid grid-cols-2 gap-2">
-      <Impact label="Residents Served" value={residents.toLocaleString()} />
-      <Impact label="Gaps Improved" value={String(gaps)} />
-      <Impact label="City Health" value={formatDelta(cityHealth)} />
-      <Impact label="Emergency" value={formatDelta(emergency)} />
-      <Impact label="Equity Score" value={formatDelta(equity)} />
-      <Impact label="15 Min City" value={formatDelta(fifteen)} />
-      <Impact label="Total Cost" value={formatMoney(cost)} />
+      <Impact label="Residents Served" value={data.residentsServed.toLocaleString()} />
+      <Impact label="Gaps Improved" value={String(data.serviceGapsImproved)} />
+      <Impact label="City Health" value={formatDelta(data.cityHealthDelta)} />
+      <Impact label="Emergency" value={formatDelta(data.emergencyDelta)} />
+      <Impact label="Equity Score" value={formatDelta(data.equityDelta)} />
+      <Impact label="15 Min City" value={formatDelta(data.fifteenMinuteDelta)} />
+      <Impact label="Total Cost" value={formatMoney(data.totalCost)} />
+    </div>
+  )
+}
+
+function CopilotHeader({ stage }: { stage: CopilotStage }) {
+  const statusLabel = stage === 'standby' ? 'Standby' : stage === 'diagnosed' ? 'Diagnosed' : 'Plan Applied'
+  const statusColor =
+    stage === 'standby'
+      ? 'var(--color-text-muted)'
+      : stage === 'diagnosed'
+        ? 'var(--color-accent-cyan)'
+        : 'var(--color-accent-green)'
+  return (
+    <div className="flex items-center gap-2.5 px-1 pt-1">
+      <div className="relative grid h-9 w-9 place-items-center rounded-full" style={{ background: 'rgba(0,184,148,0.10)', border: '1px solid rgba(0,184,148,0.45)' }}>
+        <Sparkles size={16} style={{ color: 'var(--color-accent-green)' }} />
+        <span
+          className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full"
+          style={{ background: statusColor, border: '2px solid var(--color-bg-sidebar)', boxShadow: `0 0 8px ${statusColor}` }}
+        />
+      </div>
+      <div>
+        <div className="font-display text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          UrbanMind Copilot
+        </div>
+        <div className="font-mono text-[9px] uppercase tracking-widest" style={{ color: statusColor }}>
+          {statusLabel}
+        </div>
+      </div>
     </div>
   )
 }

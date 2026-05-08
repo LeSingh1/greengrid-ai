@@ -17,7 +17,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[UrbanMind] Render failed', error, info)
+    console.error('[GreenGrid AI] Render failed', error, info)
   }
 
   render() {
@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <div className="text-xs font-mono uppercase tracking-widest text-accent-red mb-2">
             App view crashed
           </div>
-          <h1 className="text-xl font-semibold mb-2">UrbanMind needs a reset</h1>
+          <h1 className="text-xl font-semibold mb-2">GreenGrid AI needs a reset</h1>
           <p className="text-sm text-text-secondary mb-4">
             The current browser session hit a render error. Resetting clears the in-memory city and
             simulation state without changing the running server.

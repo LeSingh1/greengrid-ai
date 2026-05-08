@@ -4,6 +4,7 @@ import { useScenarioStore } from '@/stores/scenarioStore'
 import { useSimulationStore } from '@/stores/simulationStore'
 import { useNotification } from '@/hooks/useNotification'
 import { Logo } from '@/components/UI/LandingScreen'
+import { ArchitectureBadge } from '@/components/UI/ArchitectureModal'
 
 export function TopBar({ onHome }: { onHome: () => void }) {
   const selectedCity = useCityStore((state) => state.selectedCity)
@@ -39,11 +40,6 @@ export function TopBar({ onHome }: { onHome: () => void }) {
         >
           <Logo />
         </button>
-        <div className="hidden sm:block min-w-0">
-          <div className="font-display text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            UrbanMind
-          </div>
-        </div>
       </div>
 
       <div className="h-8 w-px" style={{ background: 'var(--color-border-subtle)' }} />
@@ -69,6 +65,8 @@ export function TopBar({ onHome }: { onHome: () => void }) {
       </span>
 
       <div className="flex-1" />
+
+      <ArchitectureBadge />
 
       <button
         onClick={handleAnalyze}

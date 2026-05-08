@@ -26,8 +26,8 @@ export function SplitScreenView() {
     <div style={{ position: 'absolute', inset: 0, display: 'flex', background: '#080B10' }}>
       <Pane basis={leftBasis} label={scenarioLabels[active]} color={scenarioColors[active]} metrics={metrics} />
       <div onPointerDown={startDrag} style={{ width: 4, cursor: 'col-resize', background: 'var(--color-border-subtle)', zIndex: 3 }} />
-      <Pane basis={100 - leftBasis} label="Max Growth" color={scenarioColors.max_growth} metrics={metrics} />
-      <div style={{ position: 'absolute', left: 24, right: 24, bottom: 24, height: 230, border: '1px solid var(--color-border-subtle)', borderRadius: 8, background: 'rgba(17,24,39,0.9)', padding: 12 }}>
+      <Pane basis={100 - leftBasis} label="Max Housing Growth" color={scenarioColors.max_growth} metrics={metrics} />
+      <div style={{ position: 'absolute', left: 24, right: 24, bottom: 24, height: 230, border: '1px solid var(--color-border-subtle)', borderRadius: 8, background: 'var(--color-bg-panel)', padding: 12 }}>
         <ScenarioComparison />
       </div>
     </div>
@@ -36,8 +36,8 @@ export function SplitScreenView() {
 
 function Pane({ basis, label, color, metrics }: { basis: number; label: string; color: string; metrics: any }) {
   return (
-    <section style={{ flexBasis: `${basis}%`, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #111827, #0D1117)' }}>
-      <div style={{ height: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRight: `4px solid ${color}`, background: 'rgba(17,24,39,0.92)', padding: '0 12px', fontWeight: 800 }}>{label}</div>
+    <section style={{ flexBasis: `${basis}%`, position: 'relative', overflow: 'hidden', background: 'var(--color-bg-app)' }}>
+      <div style={{ height: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRight: `4px solid ${color}`, background: 'var(--color-bg-panel)', padding: '0 12px', fontWeight: 800 }}>{label}</div>
       <div style={{ position: 'absolute', top: 48, left: 14, display: 'flex', gap: 8 }}>
         {[
           ['Pop', compact(metrics?.pop_total ?? 0)],

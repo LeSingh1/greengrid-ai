@@ -3,10 +3,13 @@ import type { MetricsSnapshot } from './city.types'
 export interface AgentAction {
   x: number
   y: number
+  lng?: number
+  lat?: number
   zone_type_id: string
   zone_display_name: string
   sps_score: number
   rejection_reason?: string
+  placement_reason?: string
 }
 
 export interface SimulationFrame {
@@ -27,6 +30,8 @@ export interface ZoneExplanation {
   explanation_text: string
   metrics_delta: Partial<MetricsSnapshot>
   surrounding_context: string
+  placement_reason?: string
+  sps_score?: number
 }
 
 export interface ExplainParams {

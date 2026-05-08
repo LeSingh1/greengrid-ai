@@ -31,7 +31,7 @@ export function CitySelector({ onCitySelected }: CitySelectorProps) {
       >
         <div className="city-select-mark">
           <Building2 size={24} />
-          <span>UrbanMind AI</span>
+          <span>GreenGrid AI</span>
         </div>
         <h1>Plan a City Expansion</h1>
         <p>Choose a planning context and start the year-by-year growth model.</p>
